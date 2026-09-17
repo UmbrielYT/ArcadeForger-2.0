@@ -1,7 +1,7 @@
 /* ArcadeForge Community Plus
    Replace only these two values with your Supabase Project URL and Publishable key. */
-const SB_URL="YOUR_SUPABASE_URL";
-const SB_KEY="YOUR_SUPABASE_PUBLISHABLE_KEY";
+const SB_URL="sb_secret_BtL4rdpBB7pFodLKGvXA7Q_cAGgJVe9";
+const SB_KEY="sb_publishable_K26ySMtDBvdT7hB-9Fe93g_iEkJyni6";
 let db=null;
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let user=null,profile=null,authMode="login",owned=new Set(),equipped={outfit:null,colour:null,hat:null,accessory:null};
