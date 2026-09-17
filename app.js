@@ -1,6 +1,6 @@
 /* ArcadeForge Community Plus
    Replace only these two values with your Supabase Project URL and Publishable key. */
-const SB_URL="sb_secret_BtL4rdpBB7pFodLKGvXA7Q_cAGgJVe9";
+const SB_URL="https://nwxqnpiefdxlgtnaekzl.supabase.co/rest/v1/";
 const SB_KEY="sb_publishable_K26ySMtDBvdT7hB-9Fe93g_iEkJyni6";
 let db=null;
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
