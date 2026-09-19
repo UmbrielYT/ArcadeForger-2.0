@@ -227,7 +227,52 @@ function localGames(){return [
  {id:"local-snake",title:"Neon Snake",description:"Eat apples and grow without hitting yourself.",icon:"🐍",template:"snake",plays:1120,likes:93,creator_id:"local",created_at:"2026-09-05",profiles:{username:"ArcadeForge",is_admin:true}}
 ];}
 function loadLocalGames(){const q=$("#search")?.value.trim().toLowerCase()||"";let games=localGames().filter(g=>!q||`${g.title} ${g.description}`.toLowerCase().includes(q));const sort=$("#sort")?.value||"new";if(sort==="plays")games.sort((a,b)=>b.plays-a.plays);if(sort==="likes")games.sort((a,b)=>b.likes-a.likes);renderGames(games);$("#gameCount").textContent=games.length;$("#featured").innerHTML=games.slice(0,6).map(card).join("");$("#creatorCount").textContent="1";$("#playCount").textContent=games.reduce((a,g)=>a+g.plays,0).toLocaleString();$("#leaderCount").textContent=user?"1":"0";}
-async function loadGames(){if(!configured()){loadLocalGames();return;}if(!ensureDb())return;const q=$("#search")?.value.trim()||"",sort=$("#sort")?.value||"new";let query=db.from("games").select("id,title,description,icon,template,plays,likes,created_at,creator_id,profiles!creator_id_fkey(username,is_admin)").eq("published",true);if(q)query=query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);query=sort==="plays"?query.order("plays",{ascending:false}):sort==="likes"?query.order("likes",{ascending:false}):query.order("created_at",{ascending:false});const r=await query.limit(60);if(r.error){console.error(r.error);toast("Could not load community games: "+r.error.message);return}const games=r.data||[];renderGames(games);$("#gameCount").textContent=games.length;$("#featured").innerHTML=games.slice(0,6).map(card).join("")||empty("No community games yet.");$("#creatorCount").textContent=new Set(games.map(g=>g.profiles?.username).filter(Boolean)).size;$("#playCount").textContent=games.reduce((a,g)=>a+(g.plays||0),0);$("#leaderCount").textContent=user?"1":"0"}
+async function loadGames(){
+  const {data: games, error} = await db
+    .from("games")
+    .select("*")
+    .order("created_at", {ascending:false});
+
+  if(error){
+    console.error(error);
+    toast("Could not load community games: " + error.message);
+    return;
+  }
+
+  const creatorIds = [...new Set(
+    (games || [])
+      .map(g => g.creator_id)
+      .filter(Boolean)
+  )];
+
+  let profiles = [];
+
+  if(creatorIds.length){
+    const {data, error: profileError} = await db
+      .from("profiles")
+      .select("id,username,is_admin")
+      .in("id", creatorIds);
+
+    if(profileError){
+      console.error(profileError);
+    }else{
+      profiles = data || [];
+    }
+  }
+
+  const profileMap = Object.fromEntries(
+    profiles.map(p => [p.id, p])
+  );
+
+  const fixedGames = (games || []).map(g => ({
+    ...g,
+    profiles: profileMap[g.creator_id] || null
+  }));
+
+  renderGames(fixedGames);
+  $("#gameCount").textContent = fixedGames.length;
+  $("#featured").innerHTML = fixedGames.slice(0,6).map(card).join("");
+}
 function empty(t){return `<div class="panel center">${esc(t)}</div>`}
 function card(g){const creator=g.profiles?.username||"Creator";const admin=g.profiles?.is_admin?" <span class=adminTag>ADMIN</span>":"";return `<article class="card"><div class="cardArt">${esc(g.icon||"🎮")}</div><div class="cardBody"><h3>${esc(g.title)}</h3><p>${esc(g.description||"")}</p><div class="meta"><span>by ${esc(creator)}${admin} · ▶ ${g.plays||0}</span><button class="like" data-like="${g.id}">♥ ${g.likes||0}</button></div><button class="primary wide" data-play="${g.id}">Play</button></div></article>`}
 function renderGames(games){$("#gamesGrid").innerHTML=games.map(card).join("")||empty("No games found.");$$('[data-play]').forEach(b=>b.onclick=()=>playGame(b.dataset.play));$$('[data-like]').forEach(b=>b.onclick=()=>likeGame(b.dataset.like))}
