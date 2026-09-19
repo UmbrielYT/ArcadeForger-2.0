@@ -20,8 +20,203 @@ function toast(t){const x=$("#toast");x.textContent=t;x.classList.add("show");cl
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function coins(){const n=profile?.is_admin?"∞":(profile?.coins||0);["#coinPill","#shopCoins","#sideCoinBig"].forEach(id=>{const x=$(id);if(x)x.textContent=n});const sc=$("#sideCoins");if(sc)sc.textContent=profile?(profile.is_admin?"ADMIN · ∞ coins":`${profile.coins||0} coins`):"Sign in"}
 function needLogin(){toast("Please sign in first.");openAuth("login")}
-function character(){const outfit=equipped.outfit?shop.find(x=>x[0]===equipped.outfit)?.[2]:"👕";const hat=equipped.hat?shop.find(x=>x[0]===equipped.hat)?.[2]:"";const acc=equipped.accessory?shop.find(x=>x[0]===equipped.accessory)?.[2]:"";const col=equipped.colour?colourEmoji[equipped.colour]:"🟦";return {outfit,hat,acc,col}}
-function avatarHtml(cls="avatar") {const c=character();return `<div class="${cls}"><span class="avHat">${c.hat}</span><span class="avHead">🙂</span><span class="avBody">${c.outfit}</span><span class="avCol">${c.col}</span><span class="avAcc">${c.acc}</span></div>`}
+function character(){
+  const outfitId = equipped.outfit || "hoodie";
+  const colourId = equipped.colour || "ocean";
+  const hatId = equipped.hat || "";
+  const accessoryId = equipped.accessory || "";
+
+  return {
+    outfitId,
+    colourId,
+    hatId,
+    accessoryId
+  };
+}
+
+function avatarHtml(cls="avatar"){
+  const c = character();
+
+  const hoodie =
+    c.outfitId === "gold" ? "#6d542d" :
+    c.outfitId === "cyber" ? "#263b58" :
+    "#292b39";
+
+  const accent =
+    c.colourId === "ruby" ? "#c94d5c" :
+    c.colourId === "green" ? "#4e9b68" :
+    "#4e78c5";
+
+  let hat = "";
+
+  if(c.hatId === "cap"){
+    hat = `
+      <path d="M82 75 Q120 42 160 72 L173 88 Q126 75 78 94 Z"
+            fill="#34384b"/>
+      <path d="M82 75 Q120 48 158 73"
+            fill="none" stroke="#69708a" stroke-width="5"/>
+    `;
+  }
+
+  if(c.hatId === "crown"){
+    hat = `
+      <path d="M82 77 L90 38 L112 59 L126 31 L142 59 L165 38 L170 80 Z"
+            fill="#e7bd45" stroke="#8b6b1f" stroke-width="4"/>
+    `;
+  }
+
+  if(c.hatId === "wizard"){
+    hat = `
+      <path d="M84 78 L124 18 L164 78 Z"
+            fill="#493e78" stroke="#282342" stroke-width="5"/>
+      <ellipse cx="124" cy="78" rx="47" ry="10"
+               fill="#594b91"/>
+    `;
+  }
+
+  let accessory = "";
+
+  if(c.accessoryId === "glasses"){
+    accessory = `
+      <rect x="78" y="112" width="43" height="32" rx="12"
+            fill="#171923" stroke="#5d6378" stroke-width="4"/>
+      <rect x="129" y="112" width="43" height="32" rx="12"
+            fill="#171923" stroke="#5d6378" stroke-width="4"/>
+      <line x1="121" y1="126" x2="129" y2="126"
+            stroke="#5d6378" stroke-width="5"/>
+    `;
+  }
+
+  if(c.accessoryId === "star"){
+    accessory = `
+      <path d="M124 226
+               L130 240 L145 242 L134 252
+               L137 267 L124 259 L111 267
+               L114 252 L103 242 L118 240 Z"
+            fill="#ffd84d"/>
+    `;
+  }
+
+  return `
+    <div class="${cls}">
+      <div class="af-character">
+        <svg class="af-character-svg"
+             viewBox="0 0 240 340"
+             role="img"
+             aria-label="ArcadeForge character">
+
+          <!-- Backpack -->
+          <rect x="45" y="155" width="150" height="120"
+                rx="32" fill="#202331" stroke="#3e4357" stroke-width="6"/>
+          <rect x="65" y="190" width="110" height="70"
+                rx="18" fill="#292d40"/>
+
+          <!-- Legs -->
+          <path d="M77 252 L116 252 L112 313 L67 313 Z"
+                fill="#282b3b"/>
+          <path d="M124 252 L163 252 L174 313 L128 313 Z"
+                fill="#282b3b"/>
+
+          <!-- Cargo pockets -->
+          <rect x="61" y="264" width="38" height="38"
+                rx="7" fill="#34384b"/>
+          <rect x="151" y="264" width="38" height="38"
+                rx="7" fill="#34384b"/>
+
+          <!-- Shoes -->
+          <path d="M57 303 Q87 294 119 310 L119 327
+                   L52 327 Q43 318 57 303 Z"
+                fill="#252838"/>
+          <path d="M121 307 Q150 294 181 310 L193 326
+                   L124 327 Z"
+                fill="#252838"/>
+
+          <path d="M55 319 L119 319 L119 329 L53 329 Z"
+                fill="#f1f1f5"/>
+          <path d="M126 319 L191 319 L193 329 L126 329 Z"
+                fill="#f1f1f5"/>
+
+          <!-- Hoodie -->
+          <path d="M59 160 Q82 137 103 137
+                   L137 137 Q159 137 181 160
+                   L191 246 Q180 265 164 267
+                   L76 267 Q59 262 50 246 Z"
+                fill="${hoodie}"/>
+
+          <!-- Hoodie pocket -->
+          <path d="M82 221 Q120 240 158 221
+                   L154 249 Q120 260 86 249 Z"
+                fill="#363a4d"/>
+
+          <!-- Hood -->
+          <path d="M73 166 Q77 128 120 128
+                   Q163 128 168 166
+                   Q145 181 120 181
+                   Q95 181 73 166 Z"
+                fill="#35394b"/>
+
+          <!-- Hoodie strings -->
+          <line x1="99" y1="164" x2="99" y2="205"
+                stroke="#f1f1f4" stroke-width="6"/>
+          <line x1="141" y1="164" x2="141" y2="205"
+                stroke="#f1f1f4" stroke-width="6"/>
+
+          <!-- Hands -->
+          <circle cx="52" cy="235" r="19" fill="#efb29d"/>
+          <circle cx="188" cy="235" r="19" fill="#efb29d"/>
+
+          <!-- Neck -->
+          <rect x="105" y="119" width="38" height="32"
+                rx="12" fill="#efb29d"/>
+
+          <!-- Head -->
+          <ellipse cx="124" cy="92" rx="67" ry="72"
+                   fill="#efb29d"/>
+
+          <!-- Hair -->
+          <path d="M61 89
+                   Q53 48 83 28
+                   Q101 9 124 26
+                   Q147 5 166 29
+                   Q196 41 188 87
+                   L170 70
+                   L151 88
+                   L135 55
+                   L116 87
+                   L94 54
+                   L77 91 Z"
+                fill="#352b2d"/>
+
+          <!-- Hair highlights -->
+          <path d="M76 42 Q99 20 117 31"
+                fill="none" stroke="#574143" stroke-width="7"/>
+          <path d="M137 29 Q160 20 177 44"
+                fill="none" stroke="#574143" stroke-width="7"/>
+
+          <!-- Eyes -->
+          <ellipse cx="98" cy="102" rx="16" ry="27"
+                   fill="#171721"/>
+          <ellipse cx="150" cy="102" rx="16" ry="27"
+                   fill="#171721"/>
+
+          <!-- Smile -->
+          <path d="M112 130 Q124 139 136 130"
+                fill="none" stroke="#9b514c"
+                stroke-width="4" stroke-linecap="round"/>
+
+          <!-- Equipped colour accent -->
+          <path d="M103 220 Q124 229 145 220"
+                fill="none" stroke="${accent}"
+                stroke-width="7" stroke-linecap="round"/>
+
+          ${hat}
+          ${accessory}
+
+        </svg>
+      </div>
+    </div>
+  `;}
+
 async function loadInventory(){owned=new Set();equipped={outfit:null,colour:null,hat:null,accessory:null};if(!user)return;const r=await db.from("inventory").select("item_id,equipped").eq("user_id",user.id);if(r.data)r.data.forEach(row=>{owned.add(row.item_id);if(row.equipped){const it=shop.find(x=>x[0]===row.item_id);if(it)equipped[{Outfit:"outfit",Colour:"colour",Hat:"hat",Accessory:"accessory"}[it[4]]]=it[0]}})}
 async function refresh(){if(!configured()){user=null;profile=null;owned=new Set();equipped={outfit:null,colour:null,hat:null,accessory:null};renderShop();updatePass();loadLocalGames();coins();return;}try{const s=await db.auth.getSession();user=s.data.session?.user||null;profile=null;if(user){let r=await db.from("profiles").select("*").eq("id",user.id).maybeSingle();if(r.error)throw r.error;profile=r.data;await loadInventory();$("#authBtn").textContent="Sign out";$("#mobileAuth").textContent="Sign out";$("#heroUser").textContent=`${profile?.is_admin?"👑 ":""}Welcome, ${profile?.username||user.email?.split("@")[0]||"Player"}!`;$("#heroSub").textContent=profile?.is_admin?"ADMIN · ∞ Forger Coins":`🪙 ${profile?.coins||0} coins · ${profile?.battle_xp||0} Battle XP`;$("#sideName").textContent=profile?.username||"Player";$("#sideAvatar").innerHTML=avatarHtml("miniCharacter");$("#heroAvatar").innerHTML=avatarHtml("heroAvatar");await renderProfile();updatePass()}else{$("#authBtn").textContent="Sign in";$("#mobileAuth").textContent="Sign in";$("#heroUser").textContent="Welcome to ArcadeForge";$("#heroSub").textContent="Sign in to save your profile and earn coins";$("#sideName").textContent="Guest";$("#sideAvatar").textContent="🧑";$("#heroAvatar").textContent="🧑";updatePass()}coins();renderShop();loadGames()}catch(e){console.error(e);toast(e.message||"Could not load your account.")}}
 function localGames(){return [
